@@ -6,12 +6,44 @@ on:
       - main
 
 jobs:
-  build-and-push-nodejs:
+  build-nodejs:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Build Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./nodejs-server
+          tags: ${{ secrets.DOCKER_USERNAME }}/nodejs-server:latest
+          outputs: type=docker,dest=/tmp/nodejs-image.tar
+          push: false
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: nodejs-image
+          path: /tmp/nodejs-image.tar
+          retention-days: 1
+
+  push-nodejs:
+    needs: build-nodejs
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: nodejs-image
+          path: /tmp
+
+      - name: Load Docker Image
+        run: docker load --input /tmp/nodejs-image.tar
 
       - name: Log in to DockerHub
         uses: docker/login-action@v2
@@ -19,7 +51,5 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Node.js Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/nodejs-server:latest ./nodejs-server
-          docker push ${{ secrets.DOCKER_USERNAME }}/nodejs-server:latest
+      - name: Push Node.js Docker Image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/nodejs-server:latest
