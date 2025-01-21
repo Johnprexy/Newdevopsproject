@@ -1,0 +1,98 @@
+# New DevOps Project
+
+This repository demonstrates a basic DevOps pipeline setup with Docker and GitHub Actions. It includes both a Python server (using Flask) and a Node.js server (using Express) containerized using Docker. Additionally, it features continuous integration and deployment (CI/CD) workflows using GitHub Actions.
+
+## Project Structure
+
+- **python-server/**: Contains the Python-based server using Flask.
+  - **Dockerfile**: Multi-stage build to create an optimized Python Docker image.
+  - **app.py**: Simple Python Flask application serving a "Hello World" message.
+  - **requirements.txt**: Python dependencies required for the Flask application.
+  
+- **nodejs-server/**: Contains the Node.js-based server using Express.
+  - **Dockerfile**: Multi-stage build to create an optimized Node.js Docker image.
+  - **app.js**: Simple Node.js Express application serving a "Hello World" message.
+  - **package.json**: Node.js dependencies required for the Express application.
+  
+- **.github/workflows/**: Contains GitHub Actions workflows for CI/CD.
+  - **pull_request.yml**: Triggered when a pull request is created to build and push the Python Docker image to DockerHub.
+  - **push_to_main.yml**: Triggered when changes are pushed to the `main` branch. It builds and pushes the Node.js Docker image to DockerHub.
+
+## Getting Started
+
+To run this project locally, you'll need to have **Docker** installed on your machine. This project also assumes you have **Git** to clone the repository and push changes.
+
+### Prerequisites
+
+Before running this project, ensure you have the following installed:
+
+- [Docker](https://www.docker.com/get-started)
+- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/) (for the Node.js server)
+- [Python](https://www.python.org/) (for the Python server)
+
+### Running the Servers Locally
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Johnprexy/Newdevopsproject.git
+   cd Newdevopsproject
+2. Build and run the Python Docker container:
+
+- Navigate to the python-server/ directory:
+cd python-server
+
+- Build the Docker image:
+docker build -t python-server .
+
+- Run the Docker container:
+docker run -p 5000:5000 python-server
+The Python server will be running at http://localhost:5000.
+
+3. Build and run the Node.js Docker container:
+
+- Navigate to the nodejs-server/ directory:
+cd ../nodejs-server
+- Build the Docker image:
+docker build -t nodejs-server .
+- Run the Docker container:
+docker run -p 3000:3000 nodejs-server
+The Node.js server will be running at http://localhost:3000.
+
+GitHub Actions Workflows
+This project includes two GitHub Actions workflows for CI/CD automation.
+
+1. pull_request.yml
+Trigger: This workflow is triggered when a pull request is created or updated to the main branch.
+Actions: It builds the Python Docker image using the Dockerfile in the python-server/ directory and pushes the image to DockerHub.
+2. push_to_main.yml
+Trigger: This workflow is triggered when changes are pushed to the main branch.
+Actions: It includes two jobs:
+Build Node.js Docker Image: Builds the Node.js Docker image using the Dockerfile in the nodejs-server/ directory.
+Push to DockerHub: Pushes the Node.js Docker image to DockerHub.
+GitHub Actions Setup
+Create DockerHub Secrets:
+
+To allow GitHub Actions to push Docker images to DockerHub, store your DockerHub credentials as secrets in your GitHub repository.
+Go to your GitHub repository's settings → Secrets → New repository secret.
+Add DOCKER_USERNAME and DOCKER_PASSWORD.
+Action Flow:
+
+When a pull request is made, the pull_request.yml workflow triggers to build and push the Python image to DockerHub.
+When changes are pushed to the main branch, the push_to_main.yml workflow runs to build and push the Node.js image to DockerHub.
+
+Docker Hub
+After running the workflows, Docker images for the Python and Node.js servers will be available on your DockerHub account. You can pull them using the following commands:
+
+For the Python server:
+docker pull <your-dockerhub-username>/python-server
+For the Node.js server:
+docker pull <your-dockerhub-username>/nodejs-server
+
+
+License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+Acknowledgments
+Thanks to GitHub Actions for automating the CI/CD process.
+Thanks to Docker for providing an easy-to-use containerization platform.
