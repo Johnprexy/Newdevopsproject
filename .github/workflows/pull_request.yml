@@ -1,4 +1,4 @@
-name: Build and Push Python Image on Pull Request
+name: Build and Push Python Docker Image
 
 on:
   pull_request:
@@ -6,23 +6,31 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Check out the code
+      uses: actions/checkout@v2
 
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Python Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/python-server:pr-${{ github.event.number }} ./python-server
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-      - name: Push Python Docker Image
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/python-server:pr-${{ github.event.number }}
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Build and Push Python Docker Image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/python-server:pr-${{ github.event.pull_request.number }} ./python-server
+        docker push ${{ secrets.DOCKER_USERNAME }}/python-server:pr-${{ github.event.pull_request.number }}
